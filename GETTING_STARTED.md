@@ -35,7 +35,7 @@ make init        # or: cp .env.example .env
 6. In the first week, fill in the **Team** table and **Problem & Idea** section of `README.md`.
 
 > Do **not** fork the public starter repository — forks are public and other teams could copy your work.
-> If the instructor updates the starter during the semester, they will announce what to copy over (CI tells you if `INSTRUCTION.md` is outdated).
+> If the instructor updates the starter during the semester, they will announce what to copy over.
 
 ---
 
@@ -167,9 +167,9 @@ flowchart LR
 
 | Milestone | Checklist |
 |-----------|-----------|
-| **M1 — Proposal** | ☐ Team table + pitch in README ☐ `docs/proposal.md` complete ☐ ownership plan agreed ☐ tag `m1` |
-| **M2 — Design & Skeleton** | ☐ `docs/protocol-design.md` (framing, messages, commands, status codes, sequence diagrams, rationale) ☐ `docs/architecture.md` (concurrency model + shared state) ☐ server accepts several clients in Docker ☐ one command works end-to-end ☐ tag `m2` |
-| **M3 — Final** | ☐ all features ☐ robustness tests in `docs/testing-guide.md` ☐ README complete ☐ tag `final` |
+| **M1 — Proposal** | ☐ Team table + pitch in README ☐ `docs/proposal.md` complete ☐ ownership plan agreed |
+| **M2 — Design & Skeleton** | ☐ `docs/protocol-design.md` (framing, messages, commands, status codes, sequence diagrams, rationale) ☐ `docs/architecture.md` (concurrency model + shared state) ☐ server accepts several clients in Docker ☐ one command works end-to-end |
+| **M3 — Final** | ☐ all features ☐ robustness tests in `docs/testing-guide.md` ☐ README complete |
 
 **Log AI usage as you go** in [`docs/ai-log.md`](docs/ai-log.md) — two minutes after each significant session is far easier than reconstructing it the night before the deadline.
 
@@ -210,7 +210,7 @@ Your PRs and commits are the evidence for the **Contribution** table and for you
 
 ## Submission Checklist
 
-Before tagging `final`:
+Before the deadline:
 
 - [ ] **README:** Team, Problem & Idea, Architecture, Quick Start, Demo evidence — filled in, no template placeholders left.
 - [ ] **AI Disclosure** (README §8) and [`docs/ai-log.md`](docs/ai-log.md) complete.
@@ -221,4 +221,3 @@ Before tagging `final`:
 - [ ] Server survives `Ctrl+C` / `kill -9` of a client and malformed input.
 - [ ] Sockets, threads and file descriptors are released (graceful shutdown).
 - [ ] Every member can explain every part they claim — see the self-check in [`.ai/ai-guide.md`](.ai/ai-guide.md#4-prepare-for-the-oral-defense).
-- [ ] CI is green on `main`.
