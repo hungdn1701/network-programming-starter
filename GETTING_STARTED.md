@@ -1,64 +1,81 @@
-# Hướng dẫn Bắt đầu (Getting Started Guide)
+# Getting Started
 
-> 📌 **Lưu ý**: File này hướng dẫn cách sử dụng starter template và triển khai đồ án. Khi hoàn tất đồ án, tài liệu chính thức của nhóm bạn sẽ được cập nhật trong [`README.md`](README.md).
-
----
-
-## 1. Yêu cầu Tiên quyết (Prerequisites)
-
-- [Git](https://git-scm.com/downloads) (bắt buộc)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (khuyến nghị cho môi trường đồng nhất giữa các thành viên)
-- Một công cụ AI Coding hỗ trợ:
-  - [Google Gemini / Antigravity](https://cloud.google.com/)
-  - [Cursor IDE](https://cursor.com/)
-  - [GitHub Copilot](https://github.com/features/copilot)
-  - [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
-  - [Windsurf](https://codeium.com/windsurf)
+> This file explains **how to use this starter**. It is not part of your deliverable — your project report is [`README.md`](README.md).
+> Rules and grading: [`INSTRUCTION.md`](INSTRUCTION.md).
 
 ---
 
-## 2. Quy trình Khởi động Nhanh (Quick Start)
+## 1. Prerequisites
 
-### Bước 1: Fork Repository
-1. Truy cập repo gốc: [https://github.com/hungdn1701/network-programming-starter](https://github.com/hungdn1701/network-programming-starter)
-2. Bấm nút **Fork** ở góc trên bên phải để tạo bản sao về tài khoản GitHub của nhóm/cá nhân bạn.
-   *(Quy trình Fork giúp giảng viên theo dõi được đồ án và các nhóm có thể cập nhật thay đổi nếu repo gốc có bản vá).*
+| Tool | Check | Install |
+|------|-------|---------|
+| Git | `git --version` | https://git-scm.com/downloads |
+| Docker Desktop (includes Compose v2) | `docker compose version` | https://docs.docker.com/get-docker/ |
+| An AI coding assistant (optional) | — | See [`.ai/ai-guide.md`](.ai/ai-guide.md) |
 
-### Bước 2: Clone về máy
-```bash
-git clone https://github.com/<YOUR-USERNAME>/network-programming-starter.git
-cd network-programming-starter
-```
-
-### Bước 3: Khởi tạo môi trường
-Chạy lệnh khởi tạo để tạo file `.env` từ `.env.example`:
-```bash
-make init
-# Hoặc chạy trực tiếp trên Windows PowerShell / Bash:
-# cp .env.example .env
-```
-
-### Bước 4: Kiểm tra và Chạy thử
-```bash
-# Khởi động toàn bộ dịch vụ (Server + Client)
-make up
-# Hoặc: docker compose up --build
-```
+> On Windows, start Docker Desktop and wait for the 🐳 icon before running any `docker` command.
+> No Docker on your machine? Open the repo in **GitHub Codespaces** — the `.devcontainer/` is pre-configured.
 
 ---
 
-## 3. Lựa chọn Công nghệ & Cấu hình Dockerfile
+## 2. Create Your Team Repository (GitHub Classroom)
 
-Template này là **Technology-Agnostic** (không áp đặt công nghệ). Dưới đây là hướng dẫn cấu hình mẫu cho 4 ngôn ngữ phổ biến nhất trong môn Lập trình mạng:
+1. Open the **GitHub Classroom assignment link** from your instructor (`https://classroom.github.com/a/...`).
+2. Pick your name from the roster. If it is missing, **stop and contact the instructor** — never pick someone else's entry.
+3. The first member **creates the team** (name: as instructed); other members **join** that team. Max 3 members.
+4. Classroom creates a private repository with all starter files: `https://github.com/<org>/<assignment>-<team>`.
+5. Every member clones it:
 
-### ☕ Cách 1: Java (Socket / ServerSocket truyền thống hoặc NIO)
+```bash
+git clone https://github.com/<org>/<assignment>-<team>.git
+cd <assignment>-<team>
+make init        # or: cp .env.example .env
+```
 
-**`server/Dockerfile`:**
+6. In the first week, fill in the **Team** table and **Problem & Idea** section of `README.md`.
+
+> Do **not** fork the public starter repository — forks are public and other teams could copy your work.
+> If the instructor updates the starter during the semester, they will announce what to copy over (CI tells you if `INSTRUCTION.md` is outdated).
+
+---
+
+## 3. Run It
+
+```bash
+make up          # build and start the server in the background  (docker compose up --build -d)
+make logs        # follow server logs
+make client      # start an interactive client (repeat in more terminals)  (docker compose run --rm client)
+make smoke       # quick check: is the server accepting TCP connections?
+make down        # stop everything
+```
+
+The server and client Dockerfiles are placeholders until you choose a language (next section).
+
+### Networking rules inside Docker
+
+| Who | Must use | Why |
+|-----|----------|-----|
+| Server (in container) | bind `SERVER_HOST=0.0.0.0` | `127.0.0.1` inside a container is unreachable from other containers |
+| Client in a container | connect to `server:5000` | Docker Compose DNS resolves service names |
+| Client running natively on your machine | connect to `localhost:5000` | port 5000 is published to the host |
+
+All values come from `.env` (`SERVER_HOST`, `SERVER_PORT`, `CLIENT_TARGET_HOST`, `CLIENT_TARGET_PORT`).
+
+---
+
+## 4. Choose a Language — Dockerfile Examples
+
+Replace `server/Dockerfile` and `client/Dockerfile` with one of these (adapt file names).
+
+<details>
+<summary><b>Java</b> (Socket / ServerSocket or NIO)</summary>
+
 ```dockerfile
+# server/Dockerfile
 FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /app
 COPY src/ ./src/
-RUN javac -d bin src/*.java
+RUN javac -d bin $(find src -name "*.java")
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
@@ -66,130 +83,142 @@ COPY --from=build /app/bin ./bin
 EXPOSE 5000
 CMD ["java", "-cp", "bin", "Server"]
 ```
+Client: same pattern, `CMD ["java", "-cp", "bin", "Client"]`.
+</details>
 
-**`client/Dockerfile`:**
+<details>
+<summary><b>Python</b> (socket / asyncio)</summary>
+
 ```dockerfile
-FROM eclipse-temurin:21-jdk-alpine
-WORKDIR /app
-COPY src/ ./src/
-RUN javac -d bin src/*.java
-CMD ["java", "-cp", "bin", "Client"]
-```
-
----
-
-### 🐍 Cách 2: Python (socket / asyncio)
-
-**`server/Dockerfile`:**
-```dockerfile
-FROM python:3.11-slim
+# server/Dockerfile
+FROM python:3.12-slim
 WORKDIR /app
 COPY requirements.txt* ./
 RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; fi
 COPY src/ ./src/
 EXPOSE 5000
-CMD ["python", "src/server.py"]
+CMD ["python", "-u", "src/server.py"]
 ```
+Client: same pattern, `CMD ["python", "-u", "src/client.py"]`. (`-u` = unbuffered output, so logs appear immediately.)
+</details>
 
-**`client/Dockerfile`:**
+<details>
+<summary><b>C / C++</b> (POSIX sockets, pthreads)</summary>
+
 ```dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt* ./
-RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; fi
-COPY src/ ./src/
-CMD ["python", "src/client.py"]
-```
-
----
-
-### ⚡ Cách 3: C/C++ (POSIX Sockets / Winsock)
-
-**`server/Dockerfile`:**
-```dockerfile
-FROM gcc:13 AS build
+# server/Dockerfile
+FROM gcc:14 AS build
 WORKDIR /app
 COPY src/ ./src/
-RUN gcc -O2 -pthread -o server src/server.c
+RUN gcc -O2 -pthread -o server src/*.c
 
-FROM ubuntu:22.04
+FROM debian:bookworm-slim
 WORKDIR /app
 COPY --from=build /app/server .
 EXPOSE 5000
 CMD ["./server"]
 ```
+</details>
 
----
+<details>
+<summary><b>Node.js</b> (net / dgram)</summary>
 
-### 🟢 Cách 4: Node.js / TypeScript (net / dgram module)
-
-**`server/Dockerfile`:**
 ```dockerfile
-FROM node:20-alpine
+# server/Dockerfile
+FROM node:22-alpine
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm ci --omit=dev || npm install --omit=dev
 COPY src/ ./src/
 EXPOSE 5000
 CMD ["node", "src/server.js"]
 ```
+</details>
 
----
+<details>
+<summary><b>Go</b> (net)</summary>
 
-## 4. Quy tắc Mạng & Giao tiếp trong Docker
+```dockerfile
+# server/Dockerfile
+FROM golang:1.23-alpine AS build
+WORKDIR /app
+COPY src/ ./
+RUN go build -o /server .
 
-> ⚠️ **Lỗi phổ biến nhất của sinh viên**:
-> 1. **Lắng nghe sai địa chỉ ở Server**: Trong container, Server PHẢI bind vào `0.0.0.0` (tất cả các card mạng), **KHÔNG ĐƯỢC** bind vào `127.0.0.1` hay `localhost`. Nếu bind vào `127.0.0.1`, Client từ bên ngoài container sẽ không thể kết nối tới!
-> 2. **Client kết nối sai địa chỉ**:
->    - Khi Client chạy **trong container Docker**: kết nối tới hostname `server` (nhờ Docker DNS nội bộ), cổng `5000`.
->    - Khi Client chạy **trực tiếp ngoài máy Host**: kết nối tới `localhost:5000`.
-
-Biến môi trường trong `.env`:
-```ini
-SERVER_HOST=0.0.0.0
-SERVER_PORT=5000
-
-CLIENT_TARGET_HOST=server
-CLIENT_TARGET_PORT=5000
+FROM alpine:3.20
+COPY --from=build /server /server
+EXPOSE 5000
+CMD ["/server"]
 ```
+</details>
+
+Using `shared/` code in both images? Change the build context to the repo root in `docker-compose.yml`
+(`build: { context: ., dockerfile: server/Dockerfile }`) and `COPY shared/ ./shared/`.
 
 ---
 
-## 5. Các Lệnh Tiện ích (Makefile)
-
-| Lệnh | Ý nghĩa |
-|---|---|
-| `make init` | Tạo file `.env` từ `.env.example` |
-| `make up` | Build và chạy các container dưới nền |
-| `make down` | Dừng toàn bộ container và giải phóng mạng |
-| `make logs` | Xem stream log của Server và Client |
-| `make server-logs` | Chỉ xem log của riêng Server |
-| `make client-run` | Chạy 1 instance Client có giao diện tương tác (interactive CLI) |
-| `make server-shell`| Mở terminal bash/sh trực tiếp bên trong container Server |
-| `make clean` | Xóa các image và container tạm thời |
-
----
-
-## 6. Lộ trình Triển khai Đồ án (Workflow)
+## 5. Workflow by Milestone
 
 ```mermaid
-flowchart TD
-    W1["1. Thiết kế Giao thức\n(docs/protocol-design.md)"] --> W2["2. Thiết kế Kiến trúc Concurrency\n(docs/architecture.md)"]
-    W2 --> W3["3. Xây dựng Server Socket & Lắng nghe"]
-    W3 --> W4["4. Xây dựng Client & Giao diện tương tác"]
-    W4 --> W5["5. Kiểm thử Đa luồng & Lỗi mạng\n(docs/testing-guide.md)"]
-    W5 --> W6["6. Hoàn thiện Báo cáo README & Nộp bài"]
+flowchart LR
+    M1["M1 Proposal<br/>docs/proposal.md"] --> M2["M2 Design & Walking Skeleton<br/>protocol-design.md · architecture.md<br/>server accepts clients · 1 command end-to-end"]
+    M2 --> M3["M3 Final & Oral Defense<br/>features · robustness · tests<br/>README AI Disclosure + Contribution"]
 ```
+
+| Milestone | Checklist |
+|-----------|-----------|
+| **M1 — Proposal** | ☐ Team table + pitch in README ☐ `docs/proposal.md` complete ☐ ownership plan agreed ☐ tag `m1` |
+| **M2 — Design & Skeleton** | ☐ `docs/protocol-design.md` (framing, messages, commands, status codes, sequence diagrams, rationale) ☐ `docs/architecture.md` (concurrency model + shared state) ☐ server accepts several clients in Docker ☐ one command works end-to-end ☐ tag `m2` |
+| **M3 — Final** | ☐ all features ☐ robustness tests in `docs/testing-guide.md` ☐ README complete ☐ tag `final` |
+
+**Log AI usage as you go** in [`docs/ai-log.md`](docs/ai-log.md) — two minutes after each significant session is far easier than reconstructing it the night before the deadline.
 
 ---
 
-## 7. Danh mục Kiểm tra Nộp bài (Submission Checklist)
+## 6. Team Git Workflow
 
-Trước khi nộp bài và bảo vệ, hãy kiểm tra lần lượt:
+```
+main  ← protected by convention: merge via Pull Requests only
+ ├── feature/protocol-parser     (member 1)
+ ├── feature/session-manager     (member 2)
+ └── feature/cli-client          (member 3)
+```
 
-- [ ] **Nhận diện**: Cập nhật đầy đủ họ tên, MSSV, lớp, tỷ lệ đóng góp trong [`README.md`](README.md).
-- [ ] **Tài liệu giao thức**: Hoàn thiện [`docs/protocol-design.md`](docs/protocol-design.md) có đầy đủ định dạng thông điệp, danh sách mã lệnh và sơ đồ trao đổi.
-- [ ] **Khởi chạy độc lập**: Kiểm tra trên máy mới: chỉ cần gõ `docker compose up --build` là Server khởi động thành công và sẵn sàng nhận kết nối.
-- [ ] **Không hardcode IP/Port**: Toàn bộ cấu hình mạng được đọc từ biến môi trường (`.env`).
-- [ ] **Xử lý ngắt kết nối an toàn**: Server không bị crash (văng lỗi Exception không bắt) khi Client bất ngờ tắt ứng dụng (`Ctrl+C` hoặc rớt mạng).
-- [ ] **Giải phóng tài nguyên**: Socket, File Descriptor, Thread pool được đóng đúng quy trình (Graceful Shutdown).
+1. `git checkout -b feature/<short-name>`
+2. Commit small and often, with meaningful messages, **from your own account**.
+3. Open a Pull Request — the PR template asks how you tested it and whether AI was used.
+4. Another member reviews, then merge.
+
+Your PRs and commits are the evidence for the **Contribution** table and for your oral-defense questions.
+
+---
+
+## 7. Useful Commands
+
+| Command | Meaning |
+|---------|---------|
+| `make init` | Create `.env` from `.env.example` |
+| `make up` | Build and start the server in the background |
+| `make client` | Run one interactive client container |
+| `make logs` | Follow logs of all running containers |
+| `make smoke` | Check that the server accepts TCP connections |
+| `make server-shell` | Shell inside the running server container |
+| `make down` | Stop and remove containers |
+| `make clean` | Remove containers, volumes and built images |
+
+---
+
+## Submission Checklist
+
+Before tagging `final`:
+
+- [ ] **README:** Team, Problem & Idea, Architecture, Quick Start, Demo evidence — filled in, no template placeholders left.
+- [ ] **AI Disclosure** (README §8) and [`docs/ai-log.md`](docs/ai-log.md) complete.
+- [ ] **Contribution** table complete and **confirmed by every member**.
+- [ ] `docs/proposal.md`, `docs/protocol-design.md`, `docs/architecture.md`, `docs/testing-guide.md` complete and consistent with the code.
+- [ ] Clean start works: `docker compose down -v && docker compose up --build`.
+- [ ] No hard-coded IPs/ports — everything from `.env`; `.env.example` lists every variable.
+- [ ] Server survives `Ctrl+C` / `kill -9` of a client and malformed input.
+- [ ] Sockets, threads and file descriptors are released (graceful shutdown).
+- [ ] Every member can explain every part they claim — see the self-check in [`.ai/ai-guide.md`](.ai/ai-guide.md#4-prepare-for-the-oral-defense).
+- [ ] CI is green on `main`.

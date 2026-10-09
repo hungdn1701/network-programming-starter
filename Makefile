@@ -1,39 +1,31 @@
-.PHONY: help init up down logs clean server-shell client-shell test
+.PHONY: help init up down logs client smoke server-shell clean check-instruction
 
-help:
-	@echo "Available commands:"
-	@echo "  make init          - Initialize project (.env file)"
-	@echo "  make up            - Build and start all services"
-	@echo "  make down          - Stop and remove containers"
-	@echo "  make logs          - View output from containers"
-	@echo "  make clean         - Remove Docker images and volumes"
-	@echo "  make server-shell  - Open shell in server container"
-	@echo "  make client-shell  - Open shell in client container"
-	@echo "  make test          - Run automated tests"
+help: ## Show available commands
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-init:
-	bash scripts/init.sh
+init: ## Create .env from .env.example
+	@bash scripts/init.sh
 
-up:
-	docker compose up --build
+up: ## Build and start the server in the background
+	docker compose up --build -d
 
-down:
+down: ## Stop and remove containers
 	docker compose down
 
-logs:
+logs: ## Follow logs of running containers
 	docker compose logs -f
 
-clean:
-	docker compose down -v --rmi all
-
-server-shell:
-	docker compose exec server sh
-
-client-shell:
-	docker compose exec client sh
-
-client-run:
+client: ## Run one interactive client (repeat in other terminals)
 	docker compose run --rm client
 
-test:
-	docker compose run --rm client echo "Running tests..."
+smoke: ## Check that the server accepts TCP connections
+	@bash scripts/smoke-test.sh
+
+server-shell: ## Open a shell inside the running server container
+	docker compose exec server sh
+
+clean: ## Remove containers, volumes and built images
+	docker compose --profile client down -v --rmi local --remove-orphans
+
+check-instruction: ## Check INSTRUCTION.md matches the official version
+	@bash scripts/check-instruction.sh
