@@ -7,6 +7,7 @@
 Network Programming university assignment (INT1433) at PTIT. Technology-agnostic, Docker-first client-server system.
 
 ## Key Rules
+- **Instructor's Requirements**: Strictly follow all assignment guidelines and rubrics in `INSTRUCTION.md`. NEVER modify or delete `INSTRUCTION.md`.
 - **Technology-agnostic**: Any language (Java, Python, C/C++, Go, Node.js) is valid.
 - **Docker-first**: All code runs inside Docker containers (`docker compose up --build`).
 - **Server binding**: The Server MUST bind to `0.0.0.0`, NEVER `127.0.0.1` inside containers.

@@ -12,11 +12,15 @@ Kho mã nguồn mẫu (starter repository) dành cho bài tập lớn / đồ á
 Template này cho phép sinh viên tự do lựa chọn bất kỳ ngôn ngữ lập trình nào (Java, Python, C/C++, Go, Node.js...),
 hỗ trợ đóng gói môi trường qua Docker, và tích hợp sẵn bộ quy chuẩn hỗ trợ lập trình bằng AI (Gemini, Claude, Cursor, Copilot, Windsurf).
 
+> 📜 **Quy chế & Barem chấm điểm**: Đọc kỹ [`INSTRUCTION.md`](INSTRUCTION.md) do giảng viên ban hành trước khi làm bài.  
 > 📖 **Lần đầu sử dụng repo này?** Xem [`GETTING_STARTED.md`](GETTING_STARTED.md) để biết hướng dẫn fork, thiết lập môi trường, và checklist nộp bài.
 
 ---
 
-## 👥 Danh sách sinh viên thực hiện
+## 👥 Thông tin Nhóm & Đề tài
+
+- **Tên nhóm**: Nhóm 01 — Lập trình mạng
+- **Chủ đề đã đăng ký**: *(Ví dụ: Hệ thống trò chuyện đa phòng qua Socket TCP)*
 
 | STT | Họ và tên | Mã sinh viên | Lớp | Vai trò | Tỷ lệ đóng góp |
 |:---:|---|:---:|:---:|---|:---:|
