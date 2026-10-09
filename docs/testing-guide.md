@@ -1,111 +1,88 @@
-# Hướng dẫn Kiểm thử Ứng dụng Mạng (Network Testing Guide)
+# Testing Guide & Test Evidence
 
-> 📌 **Tài liệu đồ án**: Lập trình mạng (INT1433)
-
----
-
-## 1. Kiểm thử Thủ công bằng Công cụ Mạng Thô (Raw Socket Testing)
-
-Trước khi viết ứng dụng Client hoàn chỉnh, bạn có thể kiểm tra Server ngay lập tức bằng các công cụ mạng tiêu chuẩn để xác minh tính đúng đắn của giao thức.
-
-### Sử dụng Netcat (`nc`)
-Netcat cho phép gửi chuỗi byte trực tiếp qua kết nối TCP hoặc UDP:
-
-```bash
-# Kết nối TCP tới Server đang chạy trên cổng 5000:
-nc localhost 5000
-
-# Gửi thử một lệnh theo giao thức:
-{"command": "AUTH", "payload": {"username": "test", "password": "123"}}
-```
-
-*Nếu giao thức dùng UDP:*
-```bash
-nc -u localhost 5000
-```
-
-### Sử dụng Telnet (trên Windows/Linux)
-```bash
-telnet localhost 5000
-```
+> Part 1 shows **how** to test a networked system. Part 2 is **your evidence** — graded under B1/B2.
+> All results must come from actually running your system (see `INSTRUCTION.md` §7).
 
 ---
 
-## 2. Kiểm thử Tải Đồng thời (Concurrency & Stress Testing)
+## Part 1 — How to Test
 
-Để chứng minh Server của bạn hỗ trợ nhiều client cùng lúc (không bị nghẽn theo kiểu Iterative), hãy sử dụng script sinh kết nối tự động:
+### 1.1 Manual testing with raw tools
 
-### Script Python giả lập N Client đồng thời:
-Tạo file kiểm thử `test_concurrency.py`:
+Talk to the server directly before the client exists:
+
+```bash
+nc localhost 5000            # TCP
+nc -u localhost 5000         # UDP
+# then type a message in your protocol, e.g.:
+{"command": "PING", "requestId": "1", "payload": {}}
+```
+
+`telnet localhost 5000` also works for TCP text protocols.
+
+### 1.2 Concurrency / load test
+
+Prove the server serves many clients at once. Example script (adapt the message to your protocol and framing):
 
 ```python
-import socket
-import threading
-import time
+# tests/load_test.py — run on the host while the server is up
+import os, socket, threading, time
 
-SERVER_HOST = 'localhost'
-SERVER_PORT = 5000
-NUM_CLIENTS = 20
+HOST = os.getenv("CLIENT_TARGET_HOST", "localhost")
+PORT = int(os.getenv("CLIENT_TARGET_PORT", "5000"))
+N = int(os.getenv("N_CLIENTS", "50"))
+results = []
 
-def simulate_client(client_id):
+def client(i):
+    start = time.time()
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((SERVER_HOST, SERVER_PORT))
-        print(f"[Client {client_id}] Đã kết nối thành công")
-        
-        # Gửi thông điệp
-        msg = f'{{"command": "PING", "clientId": {client_id}}}\n'
-        s.sendall(msg.encode('utf-8'))
-        
-        # Nhận phản hồi
-        response = s.recv(1024)
-        print(f"[Client {client_id}] Nhận phản hồi: {response.decode('utf-8').strip()}")
-        
-        # Giữ kết nối trong vài giây để kiểm tra tải
-        time.sleep(3)
-        s.close()
+        with socket.create_connection((HOST, PORT), timeout=5) as s:
+            s.sendall(b'{"command": "PING", "requestId": "%d", "payload": {}}\n' % i)
+            data = s.recv(4096)          # a real client must loop until a full frame arrives
+            results.append((i, True, time.time() - start, data[:60]))
+            time.sleep(2)                # hold the connection open to overlap with others
     except Exception as e:
-        print(f"[Client {client_id}] Lỗi: {e}")
+        results.append((i, False, time.time() - start, str(e)))
 
-threads = []
-for i in range(NUM_CLIENTS):
-    t = threading.Thread(target=simulate_client, args=(i,))
-    threads.append(t)
-    t.start()
-    time.sleep(0.05)  # Tránh tràn SYN queue cục bộ
-
-for t in threads:
-    t.join()
-
-print("Kiểm thử tải đồng thời hoàn tất!")
+threads = [threading.Thread(target=client, args=(i,)) for i in range(N)]
+for t in threads: t.start()
+for t in threads: t.join()
+ok = [r for r in results if r[1]]
+print(f"{len(ok)}/{N} succeeded, max latency {max(r[2] for r in ok) if ok else 0:.3f}s")
 ```
 
----
+If the server were iterative, total time would grow with N; with real concurrency all clients are served in parallel.
 
-## 3. Kiểm thử Ngắt Kết nối Đột ngột (Broken Pipe / Abnormal Disconnect)
+### 1.3 Abnormal disconnects
 
-Server mạng bắt buộc phải bền bỉ trước các tình huống bất thường:
+| Scenario | How | Expected |
+|----------|-----|----------|
+| Client killed | `Ctrl+C`, `kill -9 <pid>`, or `docker kill <container>` | Server detects EOF/reset, cleans up the session, keeps serving others |
+| Client goes silent | connect and send nothing | Server times out the connection (if your protocol defines it) |
+| Garbage input | `head -c 100000 /dev/urandom \| nc localhost 5000` | Server rejects / closes that connection, does not crash or run out of memory |
+| Server stops | `docker compose stop server` | Client shows a clear error; optionally retries with backoff |
 
-1. **Client tắt máy đột ngột (`SIGKILL` hoặc ngắt cáp)**:
-   - Dùng lệnh `Ctrl+C` hoặc `kill -9 <PID_CLIENT>`.
-   - **Kỳ vọng**: Server nhận biết được việc đọc trả về `EOF` / `-1` / ngoại lệ `ConnectionResetException` và tiến hành dọn dẹp phiên kết nối, giải phóng thread, không bị văng Exception làm sập Server.
-2. **Server tắt đột ngột khi Client đang gửi tin**:
-   - Dừng Server bằng `docker compose stop server`.
-   - **Kỳ vọng**: Client phát hiện mất kết nối, hiển thị thông báo lỗi rõ ràng và có thể kích hoạt cơ chế thử lại (Retry with Exponential Backoff).
+### 1.4 Simulating a bad network
 
----
-
-## 4. Kiểm thử Độ trễ Mạng (Network Latency Simulation)
-
-Bạn có thể giả lập môi trường mạng chập chờn (Lag/Latency/Packet Loss) ngay trong Docker container bằng công cụ `tc` (Traffic Control của Linux Kernel):
+Inside a Linux container that has `iproute2` and the `NET_ADMIN` capability
+(`cap_add: [NET_ADMIN]` in `docker-compose.yml`):
 
 ```bash
-# Thêm độ trễ 100ms với độ lệch 20ms:
-tc qdisc add dev eth0 root netem delay 100ms 20ms
-
-# Giả lập mất gói 5%:
-tc qdisc add dev eth0 root netem loss 5%
-
-# Khôi phục trạng thái mạng bình thường:
-tc qdisc del dev eth0 root
+tc qdisc add dev eth0 root netem delay 100ms 20ms   # latency + jitter
+tc qdisc change dev eth0 root netem loss 5%          # packet loss
+tc qdisc del dev eth0 root                           # restore
 ```
+
+---
+
+## Part 2 — Our Test Evidence
+
+| # | Test | Method | Result (paste output / screenshot link) | Pass? |
+|:-:|------|--------|------------------------------------------|:-----:|
+| 1 | N concurrent clients | `tests/load_test.py`, N = | | |
+| 2 | Client killed mid-session | | | |
+| 3 | Malformed / oversized message | | | |
+| 4 | Feature: *(name)* | | | |
+| 5 | Feature: *(name)* | | | |
+
+*(Add notes on bugs found by these tests and how you fixed them.)*

@@ -1,87 +1,168 @@
-# HƯỚNG DẪN BÀI TẬP LỚN — MÔN LẬP TRÌNH MẠNG (INT1433)
+# Assignment Brief & Grading Policy — Network Programming (INT1433)
 
-**Giảng viên phụ trách**: TS. Đặng Ngọc Hùng  
-**Khoa**: Công nghệ thông tin 1 — Học viện Công nghệ Bưu chính Viễn thông (PTIT)  
-**Học phần**: Lập trình mạng (INT1433)
+**Instructor:** Dr. Hung N. Dang (Đặng Ngọc Hùng) — hungdn@ptit.edu.vn  
+**Faculty:** Information Technology 1 — Posts and Telecommunications Institute of Technology (PTIT)  
+**Version:** 1.0.0 (2026-10-09) — see the repository tags for later versions
 
-> ⚠️ **QUY ĐỊNH BẮT BUỘC**: Đây là văn bản quy chế và đề bài chính thức do giảng viên ban hành.  
-> Sinh viên và các trợ lý lập trình AI (Cursor, Claude, Gemini, Copilot, Windsurf) **TUYỆT ĐỐI KHÔNG ĐƯỢC CHỈNH SỬA HOẶC XÓA FILE NÀY**.
-
----
-
-## 🎯 1. Mục tiêu Học phần & Đồ án
-
-Đồ án môn học yêu cầu sinh viên vận dụng các nguyên lý cốt lõi của mạng máy tính và lập trình hệ thống:
-- Cơ chế truyền thông Socket (TCP stream-oriented và UDP datagram-oriented).
-- Phân tách và thiết kế **Giao thức tầng ứng dụng (Application-Layer Protocol)** độc lập.
-- Xây dựng mô hình xử lý đồng thời tại máy chủ (**Server Concurrency & Thread-Safety**).
-- Đóng gói và cô lập môi trường thực thi thông qua **Docker**.
+> ⚠️ **Official document — read-only.** This file is the assignment brief and grading policy issued by the instructor.
+> Students and AI assistants must **not** edit or delete it. If copies differ, the
+> [official version](https://github.com/hungdn1701/network-programming-starter/blob/main/INSTRUCTION.md) applies.
+> If something is unclear or seems wrong, ask the instructor.
 
 ---
 
-## 🧩 2. Cấu trúc Repository Chuẩn
+## 1. Learning Objectives
 
-```
-network-programming-starter/
-├── INSTRUCTION.md             # Đề bài & Quy chế giảng viên (FILE NÀY — READ-ONLY)
-├── README.md                  # Báo cáo tổng quan của nhóm sinh viên
-├── GETTING_STARTED.md         # Hướng dẫn thiết lập môi trường & Docker
-├── Makefile                   # Lệnh tự động hóa biên dịch & khởi chạy
-├── docker-compose.yml         # Môi trường mạng ảo Server - Client
-├── .env.example               # Mẫu cấu hình cổng và địa chỉ mạng
-├── server/                    # Module Server (lắng nghe, điều phối, xử lý đồng thời)
-├── client/                    # Module Client (CLI hoặc GUI tương tác)
-├── shared/                    # Giao thức dùng chung, DTO, hằng số
-└── docs/                      # Tài liệu đồ án
-    ├── protocol-design.md     # Đặc tả giao thức chi tiết
-    ├── architecture.md        # Thiết kế kiến trúc & luồng xử lý
-    └── testing-guide.md       # Báo cáo kiểm thử & đo tải đồng thời
-```
+By completing this project, each team member demonstrates that they can:
+
+- Use sockets correctly — TCP (stream-oriented) and/or UDP (datagram-oriented).
+- Design an independent **application-layer protocol**: message framing, format, commands, status codes, session flow.
+- Build a **concurrent server** that is thread-safe and robust against network failures.
+- Package and run a networked system in an isolated environment with **Docker**.
+- **Explain and defend** their own design decisions and code — including code produced with AI assistance.
 
 ---
 
-## ⚙️ 3. Yêu cầu Kỹ thuật Bắt buộc
+## 2. Teams & Repository
 
-1. **Công nghệ tự do (Technology-Agnostic)**: Nhóm được phép lựa chọn bất kỳ ngôn ngữ lập trình nào (Java, Python, C/C++, Go, Node.js, C#...).
-2. **Kiến trúc Client-Server độc lập**: Tách bạch hoàn toàn giữa client và server; không chia sẻ bộ nhớ ngoài các giao thức mạng đã đặc tả.
-3. **Đặc tả giao thức đầy đủ**: Mọi lệnh, cấu trúc gói tin, mã trạng thái và sơ đồ bắt tay phải được viết hoàn chỉnh trong [`docs/protocol-design.md`](docs/protocol-design.md).
-4. **Xử lý đồng thời (Concurrency)**: Server bắt buộc phải phục vụ được nhiều client kết nối và gửi nhận dữ liệu đồng thời mà không bị nghẽn (Blocking).
-5. **Đóng gói Docker**: Hệ thống phải khởi động được bằng lệnh duy nhất:
-   ```bash
-   docker compose up --build
-   ```
-6. **Không hardcode địa chỉ mạng**: Mọi tham số kết nối (`PORT`, `HOST`) phải được nạp từ biến môi trường (`.env`). Server trong container bắt buộc lắng nghe trên `0.0.0.0`.
-7. **Bền bỉ trước lỗi mạng**: Server không được sập (crash) khi client ngắt kết nối đột ngột hoặc gửi gói tin lỗi.
+| Rule | Detail |
+|------|--------|
+| Team size | **1–3 students. Maximum 3 — no exceptions.** |
+| Repository | Created **only** through the GitHub Classroom link announced by the instructor (private repo, starter files pre-loaded). Do not fork the public starter — your work would be public. |
+| Accounts | Every member commits from **their own** GitHub account. Pair-programmed commits should credit the partner (e.g., a `Co-authored-by:` trailer). |
+| Registration | Fill in the Team table and project pitch at the top of [`README.md`](README.md) in your first week. |
 
 ---
 
-## 💡 4. Gợi ý Chủ đề Đồ án
+## 3. Milestones
 
-Sinh viên có thể đăng ký một trong các nhóm đề tài sau (hoặc đề xuất đề tài tương đương với giảng viên):
+The project is delivered in **three milestones**. Dates, and whether a milestone carries marks or feedback only,
+are announced by the instructor for each class; milestones may be merged or adjusted to fit the class schedule.
+The three outcomes — a proposal, a design with a running skeleton, and the final product — stay the same.
 
-- **Chủ đề 1 — Hệ thống Trò chuyện Đa phòng (Multi-room Chat System)**: Hỗ trợ xác thực, phòng chat công khai, tin nhắn riêng tư (whisper), gửi file đính kèm, trạng thái online/offline.
-- **Chủ đề 2 — Hệ thống Truyền nhận Tệp Tin cậy (Reliable File Transfer Protocol)**: Truyền file dung lượng lớn qua TCP/UDP, có kiểm tra toàn vẹn (Checksum MD5/SHA), hỗ trợ tiếp tục truyền khi đứt mạng (Resume).
-- **Chủ đề 3 — Trò chơi Đối kháng qua Mạng (Multiplayer Network Game)**: Game đối kháng 2 hoặc nhiều người chơi (Cờ ca-rô, Cờ vua, Battleship, Quiz Game) với đồng bộ trạng thái bàn cờ qua Server.
-- **Chủ đề 4 — Hệ thống Giám sát & Quản trị Hệ thống Từ xa (Remote System Monitor)**: Client gửi thông số CPU/RAM/Network định kỳ về Server; Server cảnh báo khi quá tải và cho phép gửi lệnh điều khiển.
-- **Chủ đề 5 — Máy chủ Web/Proxy tùy biến (Custom Web Server / Reverse Proxy)**: Triển khai giao thức HTTP/1.1 rút gọn, hỗ trợ phục vụ file tĩnh, cân bằng tải (Load Balancing) và Cache nội bộ.
+| Milestone | Deliverable | Where |
+|-----------|-------------|-------|
+| **M1 — Proposal** | Problem, idea, scope, key technical challenge, initial protocol sketch, ownership plan | [`docs/proposal.md`](docs/proposal.md) |
+| **M2 — Design & Walking Skeleton** | Complete protocol and architecture design; server accepts concurrent connections and **one command works end-to-end** in Docker | [`docs/protocol-design.md`](docs/protocol-design.md), [`docs/architecture.md`](docs/architecture.md), `server/`, `client/` |
+| **M3 — Final Product & Oral Defense** | Full product, test evidence, README with **AI Disclosure** and **Contribution**, AI log | Whole repository |
 
----
-
-## 📊 5. Barem Chấm điểm (Grading Rubric — Thang điểm 10)
-
-| Tiêu chí | Trọng số | Mô tả chi tiết đánh giá |
-|---|:---:|---|
-| **1. Thiết kế Giao thức & Kiến trúc** | **2.0 điểm** | - Hoàn thiện đầy đủ `docs/protocol-design.md` (định dạng thông điệp, phân tách ranh giới framing, bảng mã lệnh, sơ đồ tuần tự sequence diagram) (1.0đ)<br>- Kiến trúc Client-Server rõ ràng, có sơ đồ `docs/architecture.md` chuẩn xác (1.0đ) |
-| **2. Xử lý Đồng thời & Hiệu năng Server** | **2.5 điểm** | - Server phục vụ mượt mà nhiều kết nối đồng thời không bị block luồng chính (1.5đ)<br>- Đảm bảo an toàn luồng (Thread-safety), không bị Race Condition hoặc Deadlock khi truy cập dữ liệu chung (1.0đ) |
-| **3. Tính năng Nghiệp vụ & Xử lý Ngoại lệ** | **2.5 điểm** | - Các tính năng nghiệp vụ đăng ký chạy đúng, ổn định (1.5đ)<br>- Xử lý lỗi mạng bền bỉ: bắt ngoại lệ ngắt kết nối đột ngột, timeout, giải phóng tài nguyên socket an toàn (1.0đ) |
-| **4. Đóng gói Docker & Chuẩn Mã nguồn** | **1.0 điểm** | - Khởi chạy thành công qua `docker compose up --build`, cấu hình qua `.env`, mã nguồn sạch sẽ và có tổ chức (1.0đ) |
-| **5. Báo cáo & Vấn đáp Bảo vệ** | **2.0 điểm** | - Trả lời chính xác các câu hỏi phản biện của giảng viên, giải thích được cặn kẽ mã nguồn (kể cả phần do AI hỗ trợ viết) (1.5đ)<br>- Báo cáo `README.md` đầy đủ thông tin nhóm, ảnh chụp minh chứng và hướng dẫn chạy rõ ràng (0.5đ) |
+Tip: mark each milestone with a git tag (`git tag m1 && git push origin m1`) so it is easy to find later.
 
 ---
 
-## 📋 6. Quy trình Đăng ký & Nộp bài
+## 4. Mandatory Technical Requirements
 
-1. **Thành lập nhóm**: Mỗi nhóm gồm từ **2 đến 3 sinh viên**.
-2. **Khởi tạo repo**: Fork từ `hungdn1701/network-programming-starter` về tài khoản GitHub của nhóm.
-3. **Khai báo thông tin**: Cập nhật ngay tên nhóm, danh sách thành viên và chủ đề đã đăng ký vào bảng ở đầu file [`README.md`](README.md).
-4. **Lịch sử Git**: Mọi thành viên phải có commit đóng góp rõ ràng trên GitHub để làm căn cứ đánh giá tỷ lệ hoàn thành.
+1. **Technology-agnostic** — any language (Java, Python, C/C++, Go, Node.js, C#, Rust, ...).
+2. **Independent client and server** — they share nothing except the documented network protocol.
+3. **Specified protocol** — commands, message structure, status codes and main flows are documented in [`docs/protocol-design.md`](docs/protocol-design.md) and kept consistent with the code (designing before coding is strongly recommended).
+4. **Concurrency** — the server serves many clients simultaneously without one client blocking others.
+5. **Docker** — the server starts with a single command: `docker compose up --build`. Clients run with `docker compose run --rm client` (or natively, documented in README).
+6. **No hard-coded addresses** — `HOST`/`PORT` come from environment variables (`.env`). The server binds to `0.0.0.0` inside its container.
+7. **Robustness** — the server must not crash when a client disconnects abruptly, sends malformed data, or goes silent.
+
+---
+
+## 5. Suggested Topics
+
+Choose one of the topics below **or propose your own** (original, well-motivated ideas score higher in criterion A1).
+
+1. **Multi-room Chat System** — authentication, public rooms, private messages, file attachments, presence.
+2. **Reliable File Transfer** — large files over TCP/UDP, integrity checks (MD5/SHA), resume after disconnection.
+3. **Multiplayer Network Game** — turn-based or real-time (Caro, Chess, Battleship, Quiz) with server-side state sync.
+4. **Remote System Monitor** — agents report CPU/RAM/network periodically; server raises alerts and sends commands.
+5. **Custom Web Server / Reverse Proxy** — simplified HTTP/1.1, static files, load balancing, caching.
+
+---
+
+## 6. Grading Rubric (10 points)
+
+The rubric is shared by all three of the instructor's project courses (Network Programming — INT1433, Mobile Application
+Development — INT1449, Service-Oriented Software Development — INT1448). Only the course-specific sub-criteria differ.
+
+| Part | Weight | Scored per |
+|------|:------:|-----------|
+| **A. Idea & Design** | **3.0** | Team |
+| **B. Technical Product** | **3.0** | Team |
+| **C. Individual Oral Defense** | **4.0** | **Individual** |
+
+### A. Idea & Design — 3.0 (team)
+
+| Criterion | Points | What earns full marks |
+|-----------|:------:|-----------------------|
+| **A1. Problem & Idea** | 1.0 | A real, clearly stated problem; justified scope; the non-trivial networking challenge is identified; alternatives were considered. Evidence: `docs/proposal.md`, README §2. |
+| **A2. Protocol Design** | 1.0 | `docs/protocol-design.md` is complete (framing, message format, command table, status codes, sequence diagrams) **and explains why** (TCP vs UDP, framing choice, stateful vs stateless). |
+| **A3. Architecture & Concurrency Design** | 1.0 | `docs/architecture.md` justifies the concurrency model, identifies all shared state and its locking strategy, and documents the connection lifecycle. |
+
+### B. Technical Product — 3.0 (team)
+
+| Criterion | Points | What earns full marks |
+|-----------|:------:|-----------------------|
+| **B1. Concurrency & Robustness** | 1.5 | Many simultaneous clients without blocking; no race conditions or deadlocks; survives abrupt disconnects, malformed input and timeouts; sockets/threads are released. |
+| **B2. Features** | 1.0 | Registered features work as specified by your protocol, backed by real test evidence in `docs/testing-guide.md`. |
+| **B3. Engineering Hygiene** | 0.5 | `docker compose up --build` works from a clean clone; config via `.env`; readable, organized code; meaningful git history. |
+
+### C. Individual Oral Defense — 4.0 (individual)
+
+| Criterion | Points | What earns full marks |
+|-----------|:------:|-----------------------|
+| **C1. Ownership** | 1.5 | Explains the modules they claim in the Contribution table — line by line when asked — including AI-generated code. |
+| **C2. Reasoning** | 1.5 | Justifies design decisions and trade-offs; answers "what if" questions about their design. |
+| **C3. Live Change** | 1.0 | Makes a small change or locates a bug in their own code on the spot (or walks through how they would, if time is short). |
+
+**Individual score = A + B (team) + C (individual)**, subject to the adjustments in §7 and §8.
+
+---
+
+## 7. AI Usage Policy
+
+AI assistants (ChatGPT, Claude, Gemini, Copilot, Cursor, ...) are **allowed for every part** of the project —
+ideation, design, code, tests and documentation. What is graded is **your understanding and your decisions**,
+not who typed the code.
+
+1. **Disclose.** The README **AI Disclosure** section and [`docs/ai-log.md`](docs/ai-log.md) are mandatory.
+   If they are missing, the instructor will ask you to complete them before the oral defense.
+2. **Own it.** You are responsible for every line in your repository. A part you cannot explain during the oral
+   defense earns **no credit** — in B for the team and in C for you — even if it works.
+3. **Be honest.** Significant AI use that is not disclosed, or a disclosure that contradicts the evidence, is
+   academic dishonesty: the instructor may deduct up to **2.0 points** from A + B and handle the case under PTIT regulations.
+4. **No fabrication.** Test results, logs, screenshots and benchmark numbers must come from actually running your system.
+5. **No secrets.** Never paste passwords, API keys or other people's personal data into AI tools.
+
+> Disclosing AI use never lowers your score. Hiding it does.
+
+---
+
+## 8. Contribution & Individual Assessment
+
+- The README **Contribution** table lists, for each member: the modules/documents they own, their key PRs or commits,
+  and an agreed contribution percentage. **Every member ticks the confirmation box.**
+- Evidence the instructor checks: git history (commits from each member's own account, pull requests),
+  `docs/ai-log.md` entries per member, and answers in the oral defense.
+- Oral-defense questions target the parts each member **claims**.
+- A member with no verifiable contribution (no commits/PRs and unable to explain the parts they claim) may receive a
+  reduced share of A + B, down to 0, at the instructor's decision.
+
+---
+
+## 9. Oral Defense
+
+- **Format:** about 15–20 minutes per team — roughly 5 minutes per member (adjusted per class). Every member answers
+  individually; teammates may not answer for each other. Not every question type is asked to every member — the
+  instructor picks what fits the time.
+- **Short demo first (a few minutes, prepared in advance):** the system running from a fresh start, showing the main flow.
+- **Questions are drawn from:** your proposal, design documents, the code you claim, and your `ai-log.md` entries.
+- **Sample questions:**
+  - Why TCP (or UDP) for this application? What would change if you switched?
+  - How does the receiver know where one message ends? Show what happens when a message arrives split across two `recv()` calls.
+  - Which state is shared between client handlers, and how is it protected? Where could a deadlock occur?
+  - What happens with 1,000 clients under your concurrency model? Where is the bottleneck?
+  - Kill a client with `kill -9` — show the server log and explain each line.
+  - *(Live)* Add a new command to the protocol, or change the max message size, and demonstrate it.
+
+---
+
+## 10. Final Submission
+
+- The final submission is the **last commit on `main` before the deadline**.
+- Before the deadline, go through the **Submission Checklist** in [`GETTING_STARTED.md`](GETTING_STARTED.md#submission-checklist).
+- Late submissions and resubmissions follow the policy announced by the instructor.
