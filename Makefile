@@ -32,5 +32,8 @@ server-shell:
 client-shell:
 	docker compose exec client sh
 
+client-run:
+	docker compose run --rm client
+
 test:
 	docker compose run --rm client echo "Running tests..."

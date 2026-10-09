@@ -1,12 +1,18 @@
 ---
-description: Network Programming Starter Rules
-globs: *
+description: Network programming guidelines and architectural constraints for INT1433
+globs: **/*
+alwaysApply: true
 ---
-# Cursor Rules for Network Programming
 
-You are assisting with the INT1433 Network Programming assignment.
+# Cursor Rules — Network Programming (INT1433)
 
-- Read the full system instructions from `.ai/AGENTS.md` and abide by them.
-- Ensure all solutions are technology-agnostic but follow the user's chosen language.
-- Enforce the Docker-first approach.
-- Emphasize proper environment variable usage.
+Full project rules and source of truth: `.ai/AGENTS.md`
+
+## Architecture & Constraints
+- **Technology-agnostic**: Adapt to whatever language the student chooses.
+- **Docker-first**: All code runs in containers (`docker compose up --build`).
+- **Server binding**: Bind to `0.0.0.0` in Docker container, never `127.0.0.1`.
+- **Client networking**: Inside Docker, target `server:5000`. From host, target `localhost:5000`.
+- **Protocol design**: Check `docs/protocol-design.md` before implementing message parsers.
+- **Thread safety**: Server must safely handle multiple concurrent clients.
+- **Config**: Use environment variables from `.env`.

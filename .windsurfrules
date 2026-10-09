@@ -1,4 +1,11 @@
-# Windsurf Rules
+# Windsurf Rules — Network Programming (INT1433)
 
-You are assisting with the INT1433 Network Programming assignment.
-Please read and strictly follow the guidelines in `.ai/AGENTS.md`.
+Full project rules and source of truth: .ai/AGENTS.md
+
+- Technology-agnostic: Support student's language choice
+- Docker-first: Server and Client run in containers
+- Server MUST listen on 0.0.0.0 inside containers, not 127.0.0.1
+- Client connects via server:5000 in Docker network
+- Custom protocol documented in docs/protocol-design.md
+- Concurrency and thread-safety required for Server
+- Configuration via environment variables (.env)
