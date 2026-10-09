@@ -1,0 +1,17 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build all services
+        run: docker compose build
+      - name: Start services
+        run: docker compose up -d
+      - name: Wait for services
+        run: sleep 10
+      - name: Health check
+        run: docker compose ps
+      - name: Cleanup
+        run: docker compose down

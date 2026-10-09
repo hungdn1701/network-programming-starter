@@ -1,0 +1,12 @@
+---
+description: Network Programming Starter Rules
+globs: *
+---
+# Cursor Rules for Network Programming
+
+You are assisting with the INT1433 Network Programming assignment.
+
+- Read the full system instructions from `.ai/AGENTS.md` and abide by them.
+- Ensure all solutions are technology-agnostic but follow the user's chosen language.
+- Enforce the Docker-first approach.
+- Emphasize proper environment variable usage.
