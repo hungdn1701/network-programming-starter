@@ -193,6 +193,8 @@ Your PRs and commits are the evidence for the **Contribution** table and for you
 | `make down` | Stop and remove containers |
 | `make clean` | Remove containers, volumes and built images |
 
+CI is not enabled by default. When you have code, copy `docs/ci-example.yml` to `.github/workflows/ci.yml`.
+
 ---
 
 ## Submission Checklist
